@@ -34,7 +34,7 @@ class DNS_Server:
             print(f"[-] return to {client[0]}: {random_ip}")
             reply.add_answer(RR(rname=qname, rtype=getattr(QTYPE, 'A'), rclass=1, ttl=0, rdata=random_ip))
 
-        if str(qname) == "version.bind.":
+        if str(qname).lower() == "version.bind.":
             reply.add_answer(RR(rname=qname, rtype=16, rclass=3, ttl=0, rdata=TXT("dig2@qq.com")))
 
         self.sock.sendto(reply.pack(), client)
